@@ -41,8 +41,8 @@ export default function CategoriesPage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadCategories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function openCreate() {
