@@ -21,28 +21,40 @@ export default function CategoriesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  async function loadCategories() {
-    setLoading(true);
-    setError(null);
+  async function fetchCategories(): Promise<Category[]> {
     try {
       const data = await apiFetch<Category[]>("/categories");
-      setCategories(data);
+      return data;
     } catch (err) {
       if (err instanceof ApiError) {
-        setError(err.message);
-      } else if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Error desconocido al cargar categorías");
+        throw new Error(err.message);
       }
-    } finally {
-      setLoading(false);
+      if (err instanceof Error) {
+        throw err;
+      }
+      throw new Error("Error desconocido al cargar categorías");
     }
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadCategories();
+    let active = true;
+    fetchCategories()
+      .then((data) => {
+        if (!active) return;
+        setCategories(data);
+        setError(null);
+      })
+      .catch((err: Error) => {
+        if (!active) return;
+        setError(err.message);
+      })
+      .finally(() => {
+        if (!active) return;
+        setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   function openCreate() {

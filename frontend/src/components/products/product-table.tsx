@@ -1,23 +1,13 @@
 "use client";
 
 import type { Product } from "@/types/product";
+import { formatMXN } from "@/lib/currency";
 
 interface ProductTableProps {
   products: Product[];
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
   isDeleting: boolean;
-}
-
-function formatPrice(price: string): string {
-  const value = Number(price);
-  if (Number.isNaN(value)) {
-    return price;
-  }
-  return new Intl.NumberFormat("es-ES", {
-    style: "currency",
-    currency: "EUR",
-  }).format(value);
 }
 
 export function ProductTable({ products, onEdit, onDelete, isDeleting }: ProductTableProps) {
@@ -56,7 +46,7 @@ export function ProductTable({ products, onEdit, onDelete, isDeleting }: Product
               {product.description ?? "—"}
             </div>
             <div className="flex items-center justify-between gap-2 md:col-span-2 md:justify-end">
-              <span className="font-medium tabular-nums">{formatPrice(product.price)}</span>
+              <span className="font-medium tabular-nums">{formatMXN(product.price)}</span>
               <div className="flex items-center gap-2">
                 <button
                   className="h-8 rounded-md border px-2 text-xs font-medium hover:bg-accent hover:text-accent-foreground"

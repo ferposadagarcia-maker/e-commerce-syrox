@@ -30,24 +30,33 @@ export default function ProductsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  async function loadData() {
-    try {
-      const [productData, categoryData] = await Promise.all([
-        apiFetch<Product[]>("/products"),
-        apiFetch<Category[]>("/categories"),
-      ]);
-      setProducts(productData);
-      setCategories(categoryData);
-    } catch (err) {
-      setError(resolveError(err, "Error desconocido al cargar productos"));
-    } finally {
-      setLoading(false);
-    }
+  async function fetchData(): Promise<[Product[], Category[]]> {
+    return Promise.all([
+      apiFetch<Product[]>("/products"),
+      apiFetch<Category[]>("/categories"),
+    ]);
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadData();
+    let active = true;
+    fetchData()
+      .then(([productData, categoryData]) => {
+        if (!active) return;
+        setProducts(productData);
+        setCategories(categoryData);
+        setError(null);
+      })
+      .catch((err: unknown) => {
+        if (!active) return;
+        setError(resolveError(err, "Error desconocido al cargar productos"));
+      })
+      .finally(() => {
+        if (!active) return;
+        setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   function openCreate() {
