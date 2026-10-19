@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   Prisma,
   type Category,
@@ -22,7 +26,7 @@ export class ProductsService {
         include: { category: true },
       });
     } catch (error) {
-      this.handlePrismaError(error);
+      this.handlePrismaError(error, 'reference');
     }
   }
 
@@ -59,7 +63,7 @@ export class ProductsService {
         include: { category: true },
       });
     } catch (error) {
-      this.handlePrismaError(error);
+      this.handlePrismaError(error, 'reference');
     }
   }
 
@@ -68,7 +72,7 @@ export class ProductsService {
     try {
       await this.prisma.product.delete({ where: { id } });
     } catch (error) {
-      this.handlePrismaError(error);
+      this.handlePrismaError(error, 'delete');
     }
   }
 
@@ -83,10 +87,18 @@ export class ProductsService {
     }
   }
 
-  private handlePrismaError(error: unknown): never {
+  private handlePrismaError(
+    error: unknown,
+    operation: 'reference' | 'delete',
+  ): never {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       switch (error.code) {
         case 'P2003':
+          if (operation === 'delete') {
+            throw new ConflictException(
+              'No se puede eliminar: el producto está asociado a ventas históricas',
+            );
+          }
           throw new NotFoundException('La categoría referenciada no existe');
         case 'P2025':
           throw new NotFoundException('Producto no encontrado');

@@ -5,6 +5,7 @@ import { AppService } from './app.service.js';
 import { CategoriesModule } from './categories/categories.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { ProductsModule } from './products/products.module.js';
+import { SalesModule } from './sales/sales.module.js';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { ProductsModule } from './products/products.module.js';
     PrismaModule,
     CategoriesModule,
     ProductsModule,
+    SalesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

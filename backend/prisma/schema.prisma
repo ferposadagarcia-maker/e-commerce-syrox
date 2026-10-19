@@ -22,16 +22,42 @@ model Category {
 }
 
 model Product {
-  id          String   @id @default(uuid()) @db.Uuid
+  id          String     @id @default(uuid()) @db.Uuid
   name        String
   description String?
-  price       Decimal  @db.Decimal(10, 2)
-  categoryId  String   @db.Uuid
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  price       Decimal    @db.Decimal(10, 2)
+  categoryId  String     @db.Uuid
+  category    Category   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  saleItems   SaleItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   @@index([categoryId])
 
   @@map("products")
+}
+
+model Sale {
+  id        String     @id @default(uuid()) @db.Uuid
+  total     Decimal    @db.Decimal(10, 2)
+  createdAt DateTime   @default(now())
+  items     SaleItem[]
+
+  @@map("sales")
+}
+
+model SaleItem {
+  id        String @id @default(uuid()) @db.Uuid
+  saleId    String @db.Uuid
+  productId String @db.Uuid
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+  subtotal  Decimal @db.Decimal(10, 2)
+  sale      Sale   @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([saleId])
+  @@index([productId])
+
+  @@map("sale_items")
 }
