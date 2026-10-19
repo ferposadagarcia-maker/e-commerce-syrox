@@ -5,7 +5,7 @@ import { DashboardShell } from "@/components/layout/dashboard-shell";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen grid md:grid-cols-[280px_1fr] grid-cols-1">
+    <div className="min-h-screen grid md:grid-cols-[280px_1fr] grid-cols-1 bg-background">
       <Sidebar />
       <div className="flex flex-col min-h-screen">
         <Header />

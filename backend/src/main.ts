@@ -11,6 +11,11 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    credentials: false,
+  });
   app.enableShutdownHooks();
   await app.listen(process.env.PORT ?? 3001);
 }
