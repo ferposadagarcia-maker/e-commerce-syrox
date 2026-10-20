@@ -16,6 +16,7 @@
     "start:prod": "node dist/main",
     "lint": "eslint .",
     "prisma:generate": "prisma generate",
+    "prisma:seed": "nest build && node dist/prisma/seed.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
