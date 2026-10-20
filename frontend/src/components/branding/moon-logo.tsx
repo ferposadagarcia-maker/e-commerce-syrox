@@ -5,6 +5,8 @@ interface MoonLogoProps {
   showWordmark?: boolean;
   showTagline?: boolean;
   dotClassName?: string;
+  orientation?: "vertical" | "horizontal";
+  symbolClassName?: string;
 }
 
 interface MoonSymbolProps {
@@ -50,18 +52,46 @@ export function MoonLogo({
   showWordmark = true,
   showTagline = false,
   dotClassName,
+  orientation = "vertical",
+  symbolClassName,
 }: MoonLogoProps) {
+  const isVertical = orientation === "vertical";
   return (
-    <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <MoonSymbol className="h-7 w-7" dotClassName={dotClassName} />
+    <span
+      className={cn(
+        "inline-flex",
+        isVertical
+          ? "flex-col items-center"
+          : "flex-row items-center gap-2.5",
+        className,
+      )}
+    >
+      <MoonSymbol
+        className={cn(
+          isVertical ? "h-8 w-8" : "h-7 w-7",
+          isVertical && showWordmark ? "mb-1.5" : null,
+          symbolClassName,
+        )}
+        dotClassName={dotClassName}
+      />
       {showWordmark ? (
-        <span className="flex flex-col leading-none">
+        <span
+          className={cn(
+            "flex flex-col leading-none",
+            isVertical ? "items-center" : "items-start",
+          )}
+        >
           <span className="font-heading text-lg font-semibold tracking-[0.28em]">
             MÖÖN
           </span>
           {showTagline ? (
-            <span className="mt-1 text-[0.625rem] uppercase tracking-[0.32em] opacity-70">
-              Objects in motion.
+            <span
+              className={cn(
+                "mt-1 text-[0.625rem] uppercase tracking-[0.32em] opacity-70",
+                isVertical && "text-center",
+              )}
+            >
+              Contemporary Footwear
             </span>
           ) : null}
         </span>

@@ -7,6 +7,8 @@ import { ApiError, apiFetch } from "@/lib/api";
 import { SaleTable } from "@/components/sales/sale-table";
 import { SaleDetailDialog } from "@/components/sales/sale-detail-dialog";
 import { SaleFormDialog } from "@/components/sales/sale-form-dialog";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
 
 function resolveError(err: unknown, fallback: string): string {
   if (err instanceof ApiError) return err.message;
@@ -77,24 +79,22 @@ export default function SalesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-semibold tracking-tight font-heading">
-            Ventas
-          </h1>
-          <p className="text-muted-foreground">Historial y registro de ventas</p>
-        </div>
-        <button
-          className="h-9 rounded-md bg-foreground px-3 text-sm font-medium text-background hover:opacity-90 disabled:opacity-60"
-          onClick={() => {
-            setFormError(null);
-            setFormOpen(true);
-          }}
-          disabled={submitting}
-        >
-          Generar Venta
-        </button>
-      </div>
+      <PageHeader
+        eyebrow="MÖÖN / VENTAS"
+        title="Ventas"
+        description="Consulta y registra las ventas de tu tienda."
+        actions={
+          <Button
+            onClick={() => {
+              setFormError(null);
+              setFormOpen(true);
+            }}
+            disabled={submitting}
+          >
+            Nueva venta
+          </Button>
+        }
+      />
 
       {error ? (
         <div className="border border-destructive/30 bg-destructive/5 text-destructive rounded-md px-4 py-3 text-sm">

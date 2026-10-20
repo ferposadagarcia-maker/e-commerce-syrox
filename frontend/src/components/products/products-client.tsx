@@ -12,6 +12,8 @@ import type {
 import { ApiError, apiFetch, apiUpload } from "@/lib/api";
 import { ProductForm } from "@/components/products/product-form";
 import { ProductTable } from "@/components/products/product-table";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
 
 type FormMode = "create" | "edit" | null;
 
@@ -240,28 +242,24 @@ export function ProductsClient({ editId = null }: { editId?: string | null }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-semibold tracking-tight font-heading">
-            Productos
-          </h1>
-          <p className="text-muted-foreground">
-            Gestión de productos del e-commerce
-          </p>
-        </div>
-        <button
-          className="h-9 rounded-md bg-foreground px-3 text-sm font-medium text-background hover:opacity-90 disabled:opacity-60"
-          onClick={openCreate}
-          disabled={submitting || categories.length === 0}
-          title={
-            categories.length === 0
-              ? "Crea una categoría antes de registrar productos"
-              : undefined
-          }
-        >
-          Nuevo producto
-        </button>
-      </div>
+      <PageHeader
+        eyebrow="MÖÖN / PRODUCTOS"
+        title="Productos"
+        description="Administra los productos de tu catálogo."
+        actions={
+          <Button
+            onClick={openCreate}
+            disabled={submitting || categories.length === 0}
+            title={
+              categories.length === 0
+                ? "Crea una categoría antes de registrar productos"
+                : undefined
+            }
+          >
+            Nuevo producto
+          </Button>
+        }
+      />
 
       {categories.length === 0 && !loading ? (
         <div className="border rounded-md px-4 py-3 text-sm text-muted-foreground">

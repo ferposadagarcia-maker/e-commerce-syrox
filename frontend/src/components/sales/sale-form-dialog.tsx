@@ -132,10 +132,9 @@ export function SaleFormDialog({
     >
       <DialogContent className="flex max-h-[calc(100vh-2rem)] w-full flex-col gap-0 p-0 sm:max-w-lg">
         <DialogHeader className="border-b p-4 pr-12">
-          <DialogTitle>Generar venta</DialogTitle>
+          <DialogTitle>Nueva venta</DialogTitle>
           <DialogDescription>
-            Selecciona productos y cantidades. El total se calcula en el
-            servidor.
+            Selecciona los productos y las cantidades.
           </DialogDescription>
         </DialogHeader>
 

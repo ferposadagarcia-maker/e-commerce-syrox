@@ -112,8 +112,8 @@ export function ProductForm({
           </DialogTitle>
           <DialogDescription>
             {isEdit
-              ? "Actualiza los datos del producto o su imagen."
-              : "Registra un nuevo producto en el catálogo."}
+              ? "Actualiza la información del producto."
+              : "Completa la información del producto."}
           </DialogDescription>
         </DialogHeader>
 

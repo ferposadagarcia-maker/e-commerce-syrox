@@ -49,8 +49,8 @@ export function CategoryForm({
           </DialogTitle>
           <DialogDescription>
             {isEdit
-              ? "Actualiza el nombre o la descripción de la categoría."
-              : "Crea una categoría para agrupar tus productos."}
+              ? "Actualiza la información de la categoría."
+              : "Escribe el nombre de la categoría."}
           </DialogDescription>
         </DialogHeader>
 

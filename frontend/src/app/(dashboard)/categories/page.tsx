@@ -10,6 +10,8 @@ import type { Product } from "@/types/product";
 import { ApiError, apiFetch } from "@/lib/api";
 import { CategoryForm } from "@/components/categories/category-form";
 import { CategoryAccordion } from "@/components/categories/category-accordion";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
 
 type FormMode = "create" | "edit" | null;
 
@@ -178,23 +180,16 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-semibold tracking-tight font-heading">
-            Categorías
-          </h1>
-          <p className="text-muted-foreground">
-            Gestión de categorías y sus productos
-          </p>
-        </div>
-        <button
-          className="h-9 rounded-md bg-foreground px-3 text-sm font-medium text-background hover:opacity-90 disabled:opacity-60"
-          onClick={openCreate}
-          disabled={submitting}
-        >
-          Nueva categoría
-        </button>
-      </div>
+      <PageHeader
+        eyebrow="MÖÖN / CATEGORÍAS"
+        title="Categorías"
+        description="Organiza tus productos por categoría."
+        actions={
+          <Button onClick={openCreate} disabled={submitting}>
+            Nueva categoría
+          </Button>
+        }
+      />
 
       {error ? (
         <div className="border border-destructive/30 bg-destructive/5 text-destructive rounded-md px-4 py-3 text-sm">

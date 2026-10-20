@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { MoonLogo } from "@/components/branding/moon-logo";
-import { DEMO_EMAIL, DEMO_PASSWORD, validateDemoCredentials } from "@/lib/auth";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { validateDemoCredentials } from "@/lib/auth";
 
 function LoginForm() {
   const { session, ready, login } = useAuth();
@@ -62,7 +63,7 @@ function LoginForm() {
 
     setSubmitting(true);
     if (!validateDemoCredentials(email, password)) {
-      setError("Las credenciales no coinciden. Revisa los datos de demostración.");
+      setError("Las credenciales no son correctas.");
       setSubmitting(false);
       return;
     }
@@ -92,22 +93,24 @@ function LoginForm() {
 
         <div className="relative max-w-md space-y-6">
           <p className="font-heading text-4xl font-medium leading-[1.1] tracking-tight">
-            Calzado concebido como objeto en movimiento.
+            Diseño para moverte a tu manera.
           </p>
           <p className="text-sm leading-relaxed text-white/90">
-            Un estudio de diseño que explora forma, peso y desplazamiento.
-            Cada pieza nace de un gesto mínimo y una intención precisa.
+            Una colección de calzado contemporáneo que combina estilo, comodidad
+            y personalidad.
           </p>
         </div>
 
         <div className="relative flex items-center justify-between text-[0.6875rem] uppercase tracking-[0.28em] text-white/80">
-          <span>Estudio de calzado</span>
-          <span>MMXXVI</span>
+          <span>MÖÖN — CONTEMPORARY FOOTWEAR</span>
         </div>
       </aside>
 
       {/* Panel derecho — formulario */}
-      <section className="flex items-center justify-center p-6 sm:p-10">
+      <section className="relative flex items-center justify-center p-6 sm:p-10">
+        <div className="absolute right-6 top-6 sm:right-10 sm:top-10">
+          <ThemeToggle />
+        </div>
         <div className="w-full max-w-sm space-y-8">
           <div className="lg:hidden">
             <MoonLogo showTagline dotClassName="fill-brand-deep" />
@@ -121,7 +124,7 @@ function LoginForm() {
               Iniciar sesión
             </h1>
             <p className="text-sm text-muted-foreground">
-              Panel administrativo de MÖÖN
+              Accede al panel de administración de MÖÖN.
             </p>
           </div>
 
@@ -197,22 +200,6 @@ function LoginForm() {
               {submitting ? "Entrando..." : "Entrar"}
             </button>
           </form>
-
-          <div className="rounded-md border border-dashed border-border bg-card/60 p-3 text-xs text-muted-foreground space-y-1">
-            <p className="font-medium text-foreground">
-              Credenciales de demostración
-            </p>
-            <p>
-              Correo: <span className="font-mono">{DEMO_EMAIL}</span>
-            </p>
-            <p>
-              Contraseña: <span className="font-mono">{DEMO_PASSWORD}</span>
-            </p>
-            <p>
-              Acceso simulado en el navegador. No es autenticación real ni
-              protege los endpoints del servidor.
-            </p>
-          </div>
         </div>
       </section>
     </div>
