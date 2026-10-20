@@ -9,10 +9,14 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductsService, type ProductWithCategory } from './products.service.js';
 import { CreateProductDto } from './dto/create-product.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
+import { MAX_IMAGE_BYTES } from '../storage/supabase-storage.service.js';
 
 @Controller('products')
 export class ProductsController {
@@ -39,6 +43,19 @@ export class ProductsController {
     @Body() dto: UpdateProductDto,
   ): Promise<ProductWithCategory> {
     return this.productsService.update(id, dto);
+  }
+
+  @Post(':id/image')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: MAX_IMAGE_BYTES },
+    }),
+  )
+  setImage(
+    @Param('id', ParseUUIDPipe) id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<ProductWithCategory> {
+    return this.productsService.setImage(id, file);
   }
 
   @Delete(':id')

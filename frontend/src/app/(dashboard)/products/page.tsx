@@ -8,7 +8,7 @@ import type {
   Product,
   UpdateProductPayload,
 } from "@/types/product";
-import { ApiError, apiFetch } from "@/lib/api";
+import { ApiError, apiFetch, apiUpload } from "@/lib/api";
 import { ProductForm } from "@/components/products/product-form";
 import { ProductTable } from "@/components/products/product-table";
 
@@ -75,7 +75,10 @@ export default function ProductsPage() {
     setSubmitting(false);
   }
 
-  async function handleCreate(payload: CreateProductPayload | UpdateProductPayload) {
+  async function handleCreate(
+    payload: CreateProductPayload | UpdateProductPayload,
+    imageFile?: File | null,
+  ) {
     if (payload.name === undefined || payload.price === undefined || payload.categoryId === undefined) {
       setError("Nombre, precio y categoría son obligatorios.");
       return;
@@ -83,7 +86,7 @@ export default function ProductsPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const created = await apiFetch<Product>("/products", {
+      let created = await apiFetch<Product>("/products", {
         method: "POST",
         body: JSON.stringify({
           name: payload.name,
@@ -92,6 +95,9 @@ export default function ProductsPage() {
           categoryId: payload.categoryId,
         } as CreateProductPayload),
       });
+      if (imageFile) {
+        created = await apiUpload<Product>(`/products/${created.id}/image`, imageFile);
+      }
       setProducts((prev) =>
         [...prev, created].sort((a, b) => a.name.localeCompare(b.name))
       );
@@ -102,15 +108,21 @@ export default function ProductsPage() {
     }
   }
 
-  async function handleUpdate(payload: CreateProductPayload | UpdateProductPayload) {
+  async function handleUpdate(
+    payload: CreateProductPayload | UpdateProductPayload,
+    imageFile?: File | null,
+  ) {
     if (!editing) return;
     setSubmitting(true);
     setError(null);
     try {
-      const updated = await apiFetch<Product>(`/products/${editing.id}`, {
+      let updated = await apiFetch<Product>(`/products/${editing.id}`, {
         method: "PATCH",
         body: JSON.stringify(payload),
       });
+      if (imageFile) {
+        updated = await apiUpload<Product>(`/products/${editing.id}/image`, imageFile);
+      }
       setProducts((prev) =>
         prev
           .map((product) => (product.id === updated.id ? updated : product))
@@ -134,7 +146,13 @@ export default function ProductsPage() {
       await apiFetch<void>(`/products/${product.id}`, { method: "DELETE" });
       setProducts((prev) => prev.filter((item) => item.id !== product.id));
     } catch (err) {
-      setError(resolveError(err, "Error al eliminar producto"));
+      if (err instanceof ApiError && err.status === 409) {
+        setError(
+          "No se puede eliminar este producto porque está asociado a ventas registradas. Conserva el producto o revisa el historial de ventas.",
+        );
+      } else {
+        setError(resolveError(err, "Error al eliminar producto"));
+      }
     } finally {
       setDeletingId(null);
     }
@@ -196,6 +214,7 @@ export default function ProductsPage() {
           initialDescription={editing.description}
           initialPrice={editing.price}
           initialCategoryId={editing.categoryId}
+          initialImageUrl={editing.imageUrl}
           onSubmit={handleUpdate}
           onCancel={closeForm}
           isSubmitting={submitting}

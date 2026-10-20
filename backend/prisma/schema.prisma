@@ -26,6 +26,8 @@ model Product {
   name        String
   description String?
   price       Decimal    @db.Decimal(10, 2)
+  imagePath   String?
+  imageMime   String?
   categoryId  String     @db.Uuid
   category    Category   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   saleItems   SaleItem[]

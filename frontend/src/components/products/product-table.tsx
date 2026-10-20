@@ -22,10 +22,11 @@ export function ProductTable({ products, onEdit, onDelete, isDeleting }: Product
   return (
     <div className="border rounded-lg overflow-hidden">
       <div className="hidden grid-cols-12 gap-4 bg-muted/50 px-6 py-3 text-xs font-medium text-muted-foreground md:grid">
-        <div className="col-span-4">Nombre</div>
-        <div className="col-span-3">Categoría</div>
+        <div className="col-span-1">Imagen</div>
+        <div className="col-span-3">Nombre</div>
+        <div className="col-span-2">Categoría</div>
         <div className="col-span-3">Descripción</div>
-        <div className="col-span-2 text-right">Precio / Acciones</div>
+        <div className="col-span-3 text-right">Precio / Acciones</div>
       </div>
       <div className="divide-y">
         {products.map((product) => (
@@ -33,19 +34,33 @@ export function ProductTable({ products, onEdit, onDelete, isDeleting }: Product
             key={product.id}
             className="grid grid-cols-1 gap-3 px-6 py-4 text-sm md:grid-cols-12 md:gap-4 md:items-center"
           >
-            <div className="md:col-span-4">
+            <div className="md:col-span-1">
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-md border bg-muted/30">
+                {product.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">—</span>
+                )}
+              </div>
+            </div>
+            <div className="md:col-span-3">
               <div className="font-medium">{product.name}</div>
               <div className="text-xs text-muted-foreground md:hidden">
                 {product.category?.name ?? "—"}
               </div>
             </div>
-            <div className="hidden text-muted-foreground md:col-span-3 md:block">
+            <div className="hidden text-muted-foreground md:col-span-2 md:block">
               {product.category?.name ?? "—"}
             </div>
             <div className="text-muted-foreground md:col-span-3 truncate">
               {product.description ?? "—"}
             </div>
-            <div className="flex items-center justify-between gap-2 md:col-span-2 md:justify-end">
+            <div className="flex items-center justify-between gap-2 md:col-span-3 md:justify-end">
               <span className="font-medium tabular-nums">{formatMXN(product.price)}</span>
               <div className="flex items-center gap-2">
                 <button
