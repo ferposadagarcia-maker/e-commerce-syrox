@@ -9,9 +9,13 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import type { Category } from '../generated/prisma/client.js';
-import { CategoriesService } from './categories.service.js';
+import {
+  CategoriesService,
+  type CategoryWithCount,
+} from './categories.service.js';
 import { CreateCategoryDto } from './dto/create-category.dto.js';
 import { UpdateCategoryDto } from './dto/update-category.dto.js';
 
@@ -25,8 +29,8 @@ export class CategoriesController {
   }
 
   @Get()
-  findAll(): Promise<Category[]> {
-    return this.categoriesService.findAll();
+  findAll(@Query('includeArchived') includeArchived?: string): Promise<CategoryWithCount[]> {
+    return this.categoriesService.findAll(includeArchived === 'true');
   }
 
   @Get(':id')
@@ -40,6 +44,16 @@ export class CategoriesController {
     @Body() dto: UpdateCategoryDto,
   ): Promise<Category> {
     return this.categoriesService.update(id, dto);
+  }
+
+  @Patch(':id/archive')
+  archive(@Param('id', ParseUUIDPipe) id: string): Promise<CategoryWithCount> {
+    return this.categoriesService.setActive(id, false);
+  }
+
+  @Patch(':id/restore')
+  restore(@Param('id', ParseUUIDPipe) id: string): Promise<CategoryWithCount> {
+    return this.categoriesService.setActive(id, true);
   }
 
   @Delete(':id')

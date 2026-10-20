@@ -36,7 +36,12 @@ export default function SalesPage() {
       .then(([saleData, productData]) => {
         if (!active) return;
         setSales(saleData);
-        setProducts(productData);
+        // Solo se pueden vender productos activos de categorías activas.
+        setProducts(
+          productData.filter(
+            (product) => product.isActive && product.category?.isActive,
+          ),
+        );
         setError(null);
       })
       .catch((err: unknown) => {

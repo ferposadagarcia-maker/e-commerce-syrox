@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -28,8 +29,10 @@ export class ProductsController {
   }
 
   @Get()
-  findAll(): Promise<ProductWithCategory[]> {
-    return this.productsService.findAll();
+  findAll(
+    @Query('includeArchived') includeArchived?: string,
+  ): Promise<ProductWithCategory[]> {
+    return this.productsService.findAll(includeArchived === 'true');
   }
 
   @Get(':id')
@@ -43,6 +46,16 @@ export class ProductsController {
     @Body() dto: UpdateProductDto,
   ): Promise<ProductWithCategory> {
     return this.productsService.update(id, dto);
+  }
+
+  @Patch(':id/archive')
+  archive(@Param('id', ParseUUIDPipe) id: string): Promise<ProductWithCategory> {
+    return this.productsService.setActive(id, false);
+  }
+
+  @Patch(':id/restore')
+  restore(@Param('id', ParseUUIDPipe) id: string): Promise<ProductWithCategory> {
+    return this.productsService.setActive(id, true);
   }
 
   @Post(':id/image')

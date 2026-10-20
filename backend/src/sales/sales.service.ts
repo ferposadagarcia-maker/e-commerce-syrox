@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -25,6 +26,10 @@ interface SaleItemInput {
   subtotal: Prisma.Decimal;
 }
 
+type ProductForSale = Product & {
+  category: { id: string; name: string; isActive: boolean };
+};
+
 @Injectable()
 export class SalesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -39,13 +44,26 @@ export class SalesService {
 
     const found = await this.prisma.product.findMany({
       where: { id: { in: productIds } },
+      include: {
+        category: { select: { id: true, name: true, isActive: true } },
+      },
     });
-    const productsById = new Map<string, Product>(
+    const productsById = new Map<string, ProductForSale>(
       found.map((product) => [product.id, product]),
     );
 
     const items: SaleItemInput[] = dto.items.map((item) => {
       const product = this.requireProduct(productsById, item.productId);
+      if (!product.isActive) {
+        throw new ConflictException(
+          `El producto "${product.name}" está archivado y no puede venderse`,
+        );
+      }
+      if (!product.category.isActive) {
+        throw new ConflictException(
+          `El producto "${product.name}" pertenece a la categoría archivada "${product.category.name}" y no puede venderse`,
+        );
+      }
       const unitPrice = product.price;
       return {
         productId: product.id,
@@ -95,9 +113,9 @@ export class SalesService {
   };
 
   private requireProduct(
-    productsById: Map<string, Product>,
+    productsById: Map<string, ProductForSale>,
     productId: string,
-  ): Product {
+  ): ProductForSale {
     const product = productsById.get(productId);
     if (!product) {
       throw new NotFoundException(

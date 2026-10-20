@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -27,7 +28,7 @@ export class ProductsService {
   ) {}
 
   async create(dto: CreateProductDto): Promise<ProductWithCategory> {
-    await this.ensureCategoryExists(dto.categoryId);
+    await this.ensureCategorySellable(dto.categoryId);
     try {
       const product = await this.prisma.product.create({
         data: dto,
@@ -39,8 +40,9 @@ export class ProductsService {
     }
   }
 
-  async findAll(): Promise<ProductWithCategory[]> {
+  async findAll(includeArchived = false): Promise<ProductWithCategory[]> {
     const products = await this.prisma.product.findMany({
+      where: includeArchived ? undefined : { isActive: true },
       orderBy: { name: 'asc' },
       include: { category: true },
     });
@@ -64,7 +66,7 @@ export class ProductsService {
   ): Promise<ProductWithCategory> {
     await this.ensureExists(id);
     if (dto.categoryId !== undefined) {
-      await this.ensureCategoryExists(dto.categoryId);
+      await this.ensureCategorySellable(dto.categoryId);
     }
     try {
       const product = await this.prisma.product.update({
@@ -76,6 +78,16 @@ export class ProductsService {
     } catch (error) {
       this.handlePrismaError(error, 'reference');
     }
+  }
+
+  async setActive(id: string, isActive: boolean): Promise<ProductWithCategory> {
+    await this.ensureExists(id);
+    const product = await this.prisma.product.update({
+      where: { id },
+      data: { isActive },
+      include: { category: true },
+    });
+    return this.withImageUrl(product);
   }
 
   async remove(id: string): Promise<void> {
@@ -169,13 +181,19 @@ export class ProductsService {
     }
   }
 
-  private async ensureCategoryExists(categoryId: string): Promise<void> {
+  private async ensureCategorySellable(categoryId: string): Promise<void> {
     const category = await this.prisma.category.findUnique({
       where: { id: categoryId },
+      select: { id: true, isActive: true },
     });
     if (!category) {
       throw new NotFoundException(
         `Categoría con id "${categoryId}" no encontrada`,
+      );
+    }
+    if (!category.isActive) {
+      throw new BadRequestException(
+        'No se puede asignar productos a una categoría archivada',
       );
     }
   }
