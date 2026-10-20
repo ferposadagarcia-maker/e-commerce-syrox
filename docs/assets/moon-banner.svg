@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="moonBannerTitle moonBannerDesc">
+  <title id="moonBannerTitle">MÖÖN — E-commerce Admin Dashboard</title>
+  <desc id="moonBannerDesc">Banner de marca MÖÖN con monograma geométrico, wordmark y subtítulo.</desc>
+
+  <defs>
+    <linearGradient id="moonBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5d6a57"/>
+      <stop offset="0.5" stop-color="#596653"/>
+      <stop offset="1" stop-color="#4f5b4a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fondo -->
+  <rect width="1200" height="360" fill="url(#moonBg)"/>
+
+  <!-- Detalles geométricos discretos (sand, bajo contraste) -->
+  <g fill="none" stroke="#D8C6B4" stroke-opacity="0.16">
+    <circle cx="1052" cy="72" r="150" stroke-width="1"/>
+    <circle cx="1052" cy="72" r="220" stroke-width="1"/>
+    <circle cx="148" cy="300" r="130" stroke-width="1"/>
+  </g>
+
+  <!-- Lockup centrado -->
+  <g transform="translate(523 168)">
+    <!-- Monograma (geometría real de moon-logo.tsx) -->
+    <g transform="translate(-260 -60)">
+      <g transform="scale(1.2)">
+        <path d="M20 74 V39 L50 63 L80 39 V74" fill="none" stroke="#F5F1EA" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="38" cy="21" r="5" fill="#D8C6B4"/>
+        <circle cx="62" cy="21" r="5" fill="#D8C6B4"/>
+      </g>
+    </g>
+
+    <!-- Wordmark -->
+    <text x="-150" y="-6" font-family="'Bricolage Grotesque','Instrument Sans',Helvetica,Arial,sans-serif" font-size="86" font-weight="600" letter-spacing="14" fill="#F5F1EA">MÖÖN</text>
+
+    <!-- Regla + subtítulo -->
+    <line x1="-152" y1="30" x2="-30" y2="30" stroke="#D8C6B4" stroke-width="1"/>
+    <text x="-150" y="66" font-family="'Instrument Sans',Helvetica,Arial,sans-serif" font-size="24" font-weight="400" letter-spacing="6" fill="#D8C6B4">E-COMMERCE ADMIN DASHBOARD</text>
+  </g>
+
+  <!-- Pie de banner -->
+  <text x="600" y="326" text-anchor="middle" font-family="'Instrument Sans',Helvetica,Arial,sans-serif" font-size="13" letter-spacing="4" fill="#F5F1EA" fill-opacity="0.55">CONTEMPORARY FOOTWEAR</text>
+</svg>
