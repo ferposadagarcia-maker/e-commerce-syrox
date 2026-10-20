@@ -180,7 +180,7 @@ export default function CategoriesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-semibold tracking-tight font-[family-name:var(--font-space-grotesk)]">
+          <h1 className="text-3xl font-semibold tracking-tight font-heading">
             Categorías
           </h1>
           <p className="text-muted-foreground">
@@ -202,23 +202,17 @@ export default function CategoriesPage() {
         </div>
       ) : null}
 
-      {formMode === "create" ? (
+      {formMode !== null ? (
         <CategoryForm
-          onSubmit={handleCreate}
-          onCancel={closeForm}
+          open={formMode !== null}
+          onOpenChange={(next) => {
+            if (!next) closeForm();
+          }}
+          mode={formMode}
+          initialName={editing?.name}
+          initialDescription={editing?.description}
+          onSubmit={formMode === "edit" ? handleUpdate : handleCreate}
           isSubmitting={submitting}
-          submitLabel="Crear categoría"
-        />
-      ) : null}
-
-      {formMode === "edit" && editing ? (
-        <CategoryForm
-          initialName={editing.name}
-          initialDescription={editing.description}
-          onSubmit={handleUpdate}
-          onCancel={closeForm}
-          isSubmitting={submitting}
-          submitLabel="Guardar cambios"
         />
       ) : null}
 

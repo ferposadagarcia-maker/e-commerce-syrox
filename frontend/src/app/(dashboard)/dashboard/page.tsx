@@ -104,10 +104,10 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <div className="space-y-1">
-        <h1 className="text-3xl font-semibold tracking-tight font-[family-name:var(--font-space-grotesk)]">
+        <h1 className="text-3xl font-semibold tracking-tight font-heading">
           Dashboard
         </h1>
-        <p className="text-muted-foreground">Panel administrativo de e-commerce-syrox</p>
+        <p className="text-muted-foreground">Panel administrativo de MÖÖN</p>
       </div>
 
       {error ? (
@@ -142,7 +142,7 @@ export default function DashboardPage() {
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-medium tracking-tight font-[family-name:var(--font-space-grotesk)]">
+              <h2 className="text-lg font-medium tracking-tight font-heading">
                 Ventas recientes
               </h2>
               <Link

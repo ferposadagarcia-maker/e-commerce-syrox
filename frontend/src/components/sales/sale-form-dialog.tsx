@@ -6,36 +6,39 @@ import type { Product } from "@/types/product";
 import type { CreateSalePayload } from "@/types/sale";
 import { formatMXN } from "@/lib/currency";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface LineItem {
   productId: string;
   quantity: number;
 }
 
-interface SaleFormSheetProps {
+interface SaleFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   products: Product[];
   onSubmit: (payload: CreateSalePayload) => void;
   isSubmitting: boolean;
+  error?: string | null;
 }
 
-export function SaleFormSheet({
+export function SaleFormDialog({
   open,
   onOpenChange,
   products,
   onSubmit,
   isSubmitting,
-}: SaleFormSheetProps) {
+  error = null,
+}: SaleFormDialogProps) {
   const [lines, setLines] = useState<LineItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const productsById = useMemo(() => {
     const map = new Map<string, Product>();
@@ -44,8 +47,11 @@ export function SaleFormSheet({
   }, [products]);
 
   const availableProducts = useMemo(
-    () => products.filter((product) => !lines.some((line) => line.productId === product.id)),
-    [products, lines]
+    () =>
+      products.filter(
+        (product) => !lines.some((line) => line.productId === product.id),
+      ),
+    [products, lines],
   );
 
   const estimatedTotal = useMemo(
@@ -55,24 +61,24 @@ export function SaleFormSheet({
         if (!product) return sum;
         return sum + Number(product.price) * line.quantity;
       }, 0),
-    [lines, productsById]
+    [lines, productsById],
   );
 
   function reset() {
     setLines([]);
     setSelectedProductId("");
-    setError(null);
+    setLocalError(null);
   }
 
   function handleAdd() {
-    setError(null);
+    setLocalError(null);
     const productId = selectedProductId || availableProducts[0]?.id || "";
     if (!productId) {
-      setError("Selecciona un producto.");
+      setLocalError("Selecciona un producto.");
       return;
     }
     if (lines.some((line) => line.productId === productId)) {
-      setError("Ese producto ya está en la venta.");
+      setLocalError("Ese producto ya está en la venta.");
       return;
     }
     setLines((prev) => [...prev, { productId, quantity: 1 }]);
@@ -82,8 +88,8 @@ export function SaleFormSheet({
   function updateQuantity(productId: string, quantity: number) {
     setLines((prev) =>
       prev.map((line) =>
-        line.productId === productId ? { ...line, quantity } : line
-      )
+        line.productId === productId ? { ...line, quantity } : line,
+      ),
     );
   }
 
@@ -92,16 +98,16 @@ export function SaleFormSheet({
   }
 
   function handleSubmit() {
-    setError(null);
+    setLocalError(null);
     if (lines.length === 0) {
-      setError("Agrega al menos un producto.");
+      setLocalError("Agrega al menos un producto.");
       return;
     }
     const invalid = lines.find(
-      (line) => !Number.isInteger(line.quantity) || line.quantity < 1
+      (line) => !Number.isInteger(line.quantity) || line.quantity < 1,
     );
     if (invalid) {
-      setError("Las cantidades deben ser enteros positivos.");
+      setLocalError("Las cantidades deben ser enteros positivos.");
       return;
     }
     onSubmit({
@@ -113,24 +119,27 @@ export function SaleFormSheet({
   }
 
   return (
-    <Sheet
+    <Dialog
       open={open}
-      onOpenChange={(next) => {
+      onOpenChange={(next, eventDetails) => {
+        if (isSubmitting && !next) {
+          eventDetails.cancel();
+          return;
+        }
         if (!next) reset();
         onOpenChange(next);
       }}
     >
-      <SheetContent className="w-full overflow-y-auto sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle className="font-[family-name:var(--font-space-grotesk)]">
-            Generar venta
-          </SheetTitle>
-          <SheetDescription>
-            Selecciona productos y cantidades. El total se calcula en el servidor.
-          </SheetDescription>
-        </SheetHeader>
+      <DialogContent className="flex max-h-[calc(100vh-2rem)] w-full flex-col gap-0 p-0 sm:max-w-lg">
+        <DialogHeader className="border-b p-4 pr-12">
+          <DialogTitle>Generar venta</DialogTitle>
+          <DialogDescription>
+            Selecciona productos y cantidades. El total se calcula en el
+            servidor.
+          </DialogDescription>
+        </DialogHeader>
 
-        <div className="space-y-4 px-4">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
           {products.length === 0 ? (
             <p className="border rounded-md px-3 py-3 text-sm text-muted-foreground">
               No hay productos disponibles. Primero crea productos en{" "}
@@ -140,14 +149,14 @@ export function SaleFormSheet({
               .
             </p>
           ) : (
-            <div className="space-y-2 border rounded-md p-3">
+            <div className="space-y-2 border rounded-md border-border p-3">
               <label className="text-sm font-medium" htmlFor="sale-product">
                 Producto
               </label>
               <div className="flex gap-2">
                 <select
                   id="sale-product"
-                  className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                  className="h-10 w-full rounded-md border border-input bg-card px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40"
                   value={selectedProductId}
                   onChange={(event) => setSelectedProductId(event.target.value)}
                   disabled={isSubmitting || availableProducts.length === 0}
@@ -161,7 +170,7 @@ export function SaleFormSheet({
                 </select>
                 <button
                   type="button"
-                  className="h-10 shrink-0 rounded-md border px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
+                  className="h-10 shrink-0 rounded-md border border-input px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-50"
                   onClick={handleAdd}
                   disabled={isSubmitting || availableProducts.length === 0}
                 >
@@ -171,12 +180,14 @@ export function SaleFormSheet({
             </div>
           )}
 
-          {error ? (
-            <p className="text-sm text-destructive">{error}</p>
+          {error || localError ? (
+            <p className="text-sm text-destructive" role="alert">
+              {error ?? localError}
+            </p>
           ) : null}
 
           {lines.length > 0 ? (
-            <div className="border rounded-md divide-y">
+            <div className="border rounded-md border-border divide-y divide-border">
               <div className="grid grid-cols-12 gap-2 px-3 py-2 text-xs font-medium text-muted-foreground">
                 <div className="col-span-6">Producto</div>
                 <div className="col-span-3 text-right">Cantidad</div>
@@ -185,9 +196,14 @@ export function SaleFormSheet({
               {lines.map((line) => {
                 const product = productsById.get(line.productId);
                 return (
-                  <div key={line.productId} className="grid grid-cols-12 gap-2 px-3 py-2 text-sm items-center">
+                  <div
+                    key={line.productId}
+                    className="grid grid-cols-12 gap-2 px-3 py-2 text-sm items-center"
+                  >
                     <div className="col-span-6">
-                      <div className="font-medium">{product?.name ?? "—"}</div>
+                      <div className="font-medium">
+                        {product?.name ?? "—"}
+                      </div>
                       <div className="text-xs text-muted-foreground">
                         {product ? formatMXN(product.price) : "—"} c/u
                       </div>
@@ -199,16 +215,19 @@ export function SaleFormSheet({
                         step="1"
                         value={line.quantity}
                         onChange={(event) =>
-                          updateQuantity(line.productId, Number(event.target.value))
+                          updateQuantity(
+                            line.productId,
+                            Number(event.target.value),
+                          )
                         }
-                        className="h-9 w-full rounded-md border px-2 text-right text-sm"
+                        className="h-9 w-full rounded-md border border-input bg-card px-2 text-right text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40"
                         disabled={isSubmitting}
                       />
                     </div>
                     <div className="col-span-3 text-right">
                       <button
                         type="button"
-                        className="h-8 rounded-md border px-2 text-xs font-medium hover:bg-accent hover:text-accent-foreground"
+                        className="h-8 rounded-md border border-input px-2 text-xs font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
                         onClick={() => removeLine(line.productId)}
                         disabled={isSubmitting}
                       >
@@ -220,22 +239,22 @@ export function SaleFormSheet({
               })}
               <div className="flex items-center justify-between px-3 py-3 text-sm">
                 <span className="font-medium">Total estimado</span>
-                <span className="font-semibold tabular-nums">{formatMXN(estimatedTotal)}</span>
+                <span className="font-semibold tabular-nums">
+                  {formatMXN(estimatedTotal)}
+                </span>
               </div>
             </div>
-          ) : (
-            products.length > 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Aún no has agregado productos a la venta.
-              </p>
-            ) : null
-          )}
+          ) : products.length > 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Aún no has agregado productos a la venta.
+            </p>
+          ) : null}
         </div>
 
-        <div className="mt-auto flex items-center justify-end gap-2 border-t p-4">
+        <DialogFooter className="border-t bg-transparent p-4 sm:justify-end">
           <button
             type="button"
-            className="h-9 rounded-md border px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+            className="h-9 rounded-md border border-input px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-50"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
           >
@@ -243,14 +262,14 @@ export function SaleFormSheet({
           </button>
           <button
             type="button"
-            className="h-9 rounded-md bg-foreground px-3 text-sm font-medium text-background hover:opacity-90 disabled:opacity-60"
+            className="h-9 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-60"
             onClick={handleSubmit}
             disabled={isSubmitting || products.length === 0}
           >
             {isSubmitting ? "Registrando..." : "Registrar venta"}
           </button>
-        </div>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

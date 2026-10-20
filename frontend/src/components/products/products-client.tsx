@@ -28,7 +28,11 @@ export function ProductsClient({ editId = null }: { editId?: string | null }) {
     if (typeof window === "undefined") return null;
     return new URLSearchParams(window.location.search).get("edit");
   });
-  const activeEditId = editId ?? initialEditId;
+  // Al cerrar un deep link, ignoramos el id de la URL hasta que cambie, de modo
+  // que `router.replace` no reabra el diálogo con el valor capturado al inicio.
+  const [dismissedEditId, setDismissedEditId] = useState<string | null>(null);
+  const urlEditId = editId ?? initialEditId;
+  const activeEditId = urlEditId === dismissedEditId ? null : urlEditId;
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -104,12 +108,14 @@ export function ProductsClient({ editId = null }: { editId?: string | null }) {
   function openCreate() {
     setFormMode("create");
     setEditing(null);
+    if (urlEditId) setDismissedEditId(urlEditId);
     if (activeEditId) router.replace("/products");
   }
 
   function openEdit(product: Product) {
     setFormMode("edit");
     setEditing(product);
+    if (urlEditId) setDismissedEditId(urlEditId);
     if (activeEditId) router.replace("/products");
   }
 
@@ -117,6 +123,7 @@ export function ProductsClient({ editId = null }: { editId?: string | null }) {
     setFormMode(null);
     setEditing(null);
     setSubmitting(false);
+    if (urlEditId) setDismissedEditId(urlEditId);
     if (activeEditId) router.replace("/products");
   }
 
@@ -235,7 +242,7 @@ export function ProductsClient({ editId = null }: { editId?: string | null }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-semibold tracking-tight font-[family-name:var(--font-space-grotesk)]">
+          <h1 className="text-3xl font-semibold tracking-tight font-heading">
             Productos
           </h1>
           <p className="text-muted-foreground">
@@ -292,16 +299,24 @@ export function ProductsClient({ editId = null }: { editId?: string | null }) {
 
       {formMode === "create" ? (
         <ProductForm
+          open
+          onOpenChange={(next) => {
+            if (!next) closeForm();
+          }}
+          mode="create"
           categories={categories}
           onSubmit={handleCreate}
-          onCancel={closeForm}
           isSubmitting={submitting}
-          submitLabel="Crear producto"
         />
       ) : null}
 
       {activeMode === "edit" && activeEditing ? (
         <ProductForm
+          open
+          onOpenChange={(next) => {
+            if (!next) closeForm();
+          }}
+          mode="edit"
           categories={formCategories}
           initialName={activeEditing.name}
           initialDescription={activeEditing.description}
@@ -309,9 +324,7 @@ export function ProductsClient({ editId = null }: { editId?: string | null }) {
           initialCategoryId={activeEditing.categoryId}
           initialImageUrl={activeEditing.imageUrl}
           onSubmit={handleUpdate}
-          onCancel={closeForm}
           isSubmitting={submitting}
-          submitLabel="Guardar cambios"
         />
       ) : null}
 

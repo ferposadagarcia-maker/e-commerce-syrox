@@ -5,8 +5,8 @@ import type { Product } from "@/types/product";
 import type { CreateSalePayload, Sale } from "@/types/sale";
 import { ApiError, apiFetch } from "@/lib/api";
 import { SaleTable } from "@/components/sales/sale-table";
-import { SaleDetailSheet } from "@/components/sales/sale-detail-sheet";
-import { SaleFormSheet } from "@/components/sales/sale-form-sheet";
+import { SaleDetailDialog } from "@/components/sales/sale-detail-dialog";
+import { SaleFormDialog } from "@/components/sales/sale-form-dialog";
 
 function resolveError(err: unknown, fallback: string): string {
   if (err instanceof ApiError) return err.message;
@@ -21,6 +21,7 @@ export default function SalesPage() {
   const [error, setError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [detail, setDetail] = useState<Sale | null>(null);
 
   async function fetchData(): Promise<[Sale[], Product[]]> {
@@ -59,7 +60,7 @@ export default function SalesPage() {
 
   async function handleCreate(payload: CreateSalePayload) {
     setSubmitting(true);
-    setError(null);
+    setFormError(null);
     try {
       const created = await apiFetch<Sale>("/sales", {
         method: "POST",
@@ -68,7 +69,7 @@ export default function SalesPage() {
       setSales((prev) => [created, ...prev]);
       setFormOpen(false);
     } catch (err) {
-      setError(resolveError(err, "Error al registrar la venta"));
+      setFormError(resolveError(err, "Error al registrar la venta"));
     } finally {
       setSubmitting(false);
     }
@@ -78,14 +79,17 @@ export default function SalesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-semibold tracking-tight font-[family-name:var(--font-space-grotesk)]">
+          <h1 className="text-3xl font-semibold tracking-tight font-heading">
             Ventas
           </h1>
           <p className="text-muted-foreground">Historial y registro de ventas</p>
         </div>
         <button
           className="h-9 rounded-md bg-foreground px-3 text-sm font-medium text-background hover:opacity-90 disabled:opacity-60"
-          onClick={() => setFormOpen(true)}
+          onClick={() => {
+            setFormError(null);
+            setFormOpen(true);
+          }}
           disabled={submitting}
         >
           Generar Venta
@@ -106,15 +110,19 @@ export default function SalesPage() {
         <SaleTable sales={sales} onViewDetail={setDetail} />
       )}
 
-      <SaleFormSheet
+      <SaleFormDialog
         open={formOpen}
-        onOpenChange={setFormOpen}
+        onOpenChange={(open) => {
+          setFormOpen(open);
+          if (!open) setFormError(null);
+        }}
         products={products}
         onSubmit={handleCreate}
         isSubmitting={submitting}
+        error={formError}
       />
 
-      <SaleDetailSheet
+      <SaleDetailDialog
         sale={detail}
         open={detail !== null}
         onOpenChange={(open) => {
